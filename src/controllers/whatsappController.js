@@ -9,17 +9,24 @@ let currentAgentIndex = 0;
 
 // Verificar el webhook (validación inicial de Facebook)
 exports.verifyWebhook = (req, res) => {
-  const verifyToken = process.env.VERIFY_TOKEN;
+  const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
+
+  // Obtener parámetros de la solicitud
   const mode = req.query['hub.mode'];
   const token = req.query['hub.verify_token'];
   const challenge = req.query['hub.challenge'];
 
-  if (mode === 'subscribe' && token === verifyToken) {
-    console.log('Webhook verificado con éxito.');
-    res.status(200).send(challenge); // Devuelve el challenge enviado por Facebook
-  } else {
-    res.status(403).send('Forbidden');
+  // Verificar el modo y el token
+  if (mode && token) {
+    if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+      console.log('WEBHOOK_VERIFIED');
+      return res.status(200).send(challenge);
+    } else {
+      return res.status(403).send('Forbidden: Tokens do not match');
+    }
   }
+
+  res.status(400).send('Bad Request: Missing parameters');
 };
 
 // Manejar mensajes entrantes
