@@ -16,17 +16,18 @@ exports.verifyWebhook = (req, res) => {
   const token = req.query['hub.verify_token'];
   const challenge = req.query['hub.challenge'];
 
-  // Verificar el modo y el token
-  if (mode && token) {
-    if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-      console.log('WEBHOOK_VERIFIED');
-      return res.status(200).send(challenge);
-    } else {
-      return res.status(403).send('Forbidden: Tokens do not match');
-    }
+  // Verificar que todos los parámetros necesarios estén presentes
+  if (!mode || !token || !challenge) {
+    return res.status(400).send('Bad Request: Missing parameters');
   }
 
-  res.status(400).send('Bad Request: Missing parameters');
+  // Verificar el modo y el token
+  if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+    console.log('WEBHOOK_VERIFIED');
+    return res.status(200).send(challenge);
+  } else {
+    return res.status(403).send('Forbidden: Tokens do not match');
+  }
 };
 
 // Manejar mensajes entrantes
