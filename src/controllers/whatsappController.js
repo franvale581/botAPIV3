@@ -11,25 +11,21 @@ let currentAgentIndex = 0;
 exports.verifyWebhook = (req, res) => {
   const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 
-  // Obtener parámetros de la solicitud
   const mode = req.query['hub.mode'];
   const token = req.query['hub.verify_token'];
   const challenge = req.query['hub.challenge'];
 
-  // Verificar que todos los parámetros necesarios estén presentes
-  if (!mode || !token || !challenge) {
-    return res.status(400).send('Bad Request: Missing parameters');
+  if (mode && token) {
+    if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+      console.log('WEBHOOK_VERIFIED');
+      return res.status(200).send(challenge);
+    } else {
+      return res.sendStatus(403);
+    }
   }
 
-  // Verificar el modo y el token
-  if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-    console.log('WEBHOOK_VERIFIED');
-    return res.status(200).send(challenge);
-  } else {
-    return res.status(403).send('Forbidden: Tokens do not match');
-  }
+  return res.sendStatus(404);
 };
-
 // Manejar mensajes entrantes
 exports.handleIncomingMessage = (req, res) => {
   const data = req.body;
